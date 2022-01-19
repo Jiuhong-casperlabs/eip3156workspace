@@ -1,0 +1,17 @@
+[package]
+name = "lender"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+casper-contract = "1.4"
+casper-types= "1.4"
+
+[[bin]]
+name = "flash_fee"
+path = "src/flash_fee.rs"
+bench = false
+test = false
+doctest = false
