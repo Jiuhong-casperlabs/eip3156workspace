@@ -1,3 +1,3 @@
 [workspace]
 
-members = ["lender"]
+members = ["lender","erc20"]

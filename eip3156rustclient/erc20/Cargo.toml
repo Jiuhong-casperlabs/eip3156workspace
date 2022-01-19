@@ -1,0 +1,17 @@
+[package]
+name = "erc20"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+casper-contract = "1.4"
+casper-types = "1.4"
+
+[[bin]]
+name = "getbalance"
+path = "src/getbalance.rs"
+bench = false
+test = false
+doctest = false
