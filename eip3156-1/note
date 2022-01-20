@@ -1,0 +1,10 @@
+install borrower
+
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 70000000000 \
+--session-path /home/jh/mywork/eip3156workspace/eip3156-1/target/wasm32-unknown-unknown/release/br-contract.wasm  \
+--session-arg "lender_address:Key='hash-b5b54b5479519a379d8de2c0b92ffc9ead967e5d539a79c2b1c7ce84e5784434'" 
+
+hash-0102030405060708090a0b0C0d0e0f101112131415161718191A1b1c1D1E1F20

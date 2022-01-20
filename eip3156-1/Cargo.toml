@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "flashlender",
+    "flashborrower",
+    "example/br-contract",
+    "example/ld-contract"
+]
