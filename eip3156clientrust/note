@@ -1,0 +1,24 @@
+=========get flash fee======================
+casper-client put-deploy --chain-name casper-test \
+-n http://16.162.124.124:7777 \
+--session-path target/wasm32-unknown-unknown/release/flashfee.wasm  \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 20000000000
+
+
+====get erc20 balance ==========
+casper-client put-deploy --chain-name casper-test \
+-n http://16.162.124.124:7777 \
+--session-path target/wasm32-unknown-unknown/release/getbalance.wasm  \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 1000000000
+
+
+---max_flashloan-----
+
+casper-client put-deploy --chain-name casper-test \
+-n http://16.162.124.124:7777 \
+--session-path target/wasm32-unknown-unknown/release/maxflashloan.wasm  \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 10000000000
+

@@ -1,0 +1,3 @@
+[workspace]
+
+members = ["erc20","lender","borrower"]

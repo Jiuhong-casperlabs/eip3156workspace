@@ -1,0 +1,95 @@
+ ========== ========== step1: install erc20  ========== ========== 
+under test77 
+=> erc20 contract 
+"hash-a007337031c7bc0d3a8a1b2b9d8823db80c5383ad1bd025a8b9a4b6af0fd7b2e"
+contract-package-wasm17202d448a32af52252a21c8296c9562c10a1f3da69efc5a5d01678aac753b7e
+```
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 70000000000 \
+--session-path target/wasm32-unknown-unknown/release/erc20_token.wasm  \
+--session-arg "name:String='ORANGE'" \
+--session-arg "symbol:String='OOO'" \
+--session-arg "decimals:u8='10'" \
+--session-arg "total_supply:u256='1000000000000000'" 
+```
+ skip ========== ========== step2: get balance of test77 account ========== ========== 
+```
+casper-client put-deploy --chain-name casper-test \
+-n http://16.162.124.124:7777 \
+--session-path target/wasm32-unknown-unknown/release/getbalance.wasm  \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 1000000000
+```
+
+ ========== ========== step3 =============
+install lender contract (ld-contract)   -> by js client
+=> "LENDER"
+"hash-264a963cf6da3866f21bb6fbe426d0c5d4f37fc3c297d3919a040acdb231a559"
+contract-package-wasm96053169b397360449b4de964200be449594ca93f252153f0a679b804e214a54
+ ========== ========== step4.1 =========
+transfer tokens to LENDER
+
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 10000000000 \
+--session-package-hash hash-17202d448a32af52252a21c8296c9562c10a1f3da69efc5a5d01678aac753b7e  \
+--session-entry-point "transfer" \
+--session-arg "recipient:key='hash-96053169b397360449b4de964200be449594ca93f252153f0a679b804e214a54'" \
+--session-arg "amount:u256='50000'" 
+
+
+
+ ========== ========== step 5 ==========
+====get LANDER balance of erc20==========
+
+casper-client put-deploy --chain-name casper-test \
+-n http://16.162.124.124:7777 \
+--session-path target/wasm32-unknown-unknown/release/getbalance.wasm  \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 1000000000
+
+=>5000
+
+ ========== ========== step 6 ===========
+install borrower contract(br-contract)
+-> by command
+???js client cannot parse package hash correctly => todo
+
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 70000000000 \
+--session-path /home/jh/mywork/eip3156workspace/eip3156-1/target/wasm32-unknown-unknown/release/br-contract.wasm  \
+--session-arg "lender_address:Key='hash-96053169b397360449b4de964200be449594ca93f252153f0a679b804e214a54'" 
+
+=> "BORROWER":
+"hash-2eb360a3cef054e3b588c9d342002ba6382250aa2355bd3e923ad7558da8214a"
+contract-package-wasm5daa83c7d18629fcdf3910ef4a284b6a3288e8879b24b199966857e857244844
+
+ ========== ========== step7 =========
+transfer tokens to borrower for flashfee
+
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 10000000000 \
+--session-package-hash hash-17202d448a32af52252a21c8296c9562c10a1f3da69efc5a5d01678aac753b7e  \
+--session-entry-point "transfer" \
+--session-arg "recipient:key='hash-5daa83c7d18629fcdf3910ef4a284b6a3288e8879b24b199966857e857244844'" \
+--session-arg "amount:u256='3'" 
+
+
+ ========== ==========  step 8 ========
+invoke flash_borrow of borrower
+
+casper-client put-deploy --chain-name casper-test \
+-n http://16.162.124.124:7777 \
+--secret-key /home/jh/keys/test77/secret_key.pem \
+--payment-amount 5000000000 \
+--session-package-hash hash-5daa83c7d18629fcdf3910ef4a284b6a3288e8879b24b199966857e857244844  \
+--session-entry-point "flash_borrow" \
+--session-arg "token:key='hash-17202d448a32af52252a21c8296c9562c10a1f3da69efc5a5d01678aac753b7e'" \
+--session-arg "amount:u256='2222'"
