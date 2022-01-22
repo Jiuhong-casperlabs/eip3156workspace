@@ -22,3 +22,5 @@ pub const TOKEN_RUNTIME_ARG_NAME: &str = "token";
 pub const AMOUNT_RUNTIME_ARG_NAME: &str = "amount";
 /// Name of `data` argument input.
 pub const DATA_RUNTIME_ARG_NAME: &str = "data";
+
+pub const LENDER_PACKAGE_NAME: &str = "LENDER";

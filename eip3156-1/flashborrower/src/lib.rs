@@ -4,7 +4,7 @@ mod constants;
 mod detail;
 pub mod entry_points;
 mod flashborrow;
-use crate::constants::LENDER_KEY_NAME;
+use crate::constants::{LENDER_KEY_NAME, PACKAGE_NAME};
 
 use casper_contract::contract_api::{runtime, storage};
 use casper_erc20::Address;
@@ -82,11 +82,18 @@ impl EIP3156BORROWER {
         let mut named_keys = NamedKeys::new();
         named_keys.insert(LENDER_KEY_NAME.to_string(), lender_key);
 
-        let (contract_hash, _version) =
-            storage::new_locked_contract(entry_points, Some(named_keys), None, None);
+        // storage::new_locked_contract(
+        //     entry_points,
+        //     Some(named_keys),
+        //     Some(String::from(PACKAGE_NAME)), //BORROWER is package_hash named key under account
+        //     None,
+        // );
 
-        runtime::put_key("BORROWER", Key::from(contract_hash));
-        runtime::remove_key(LENDER_KEY_NAME);
+        let (contract_package_hash, _) = storage::create_contract_package_at_hash();
+
+        storage::add_contract_version(contract_package_hash, entry_points, named_keys);
+        runtime::put_key(PACKAGE_NAME, contract_package_hash.into());
+
         Ok(EIP3156BORROWER::new(lender_uref))
     }
 }

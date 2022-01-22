@@ -3,6 +3,7 @@
 members = [
     "flashlender",
     "flashborrower",
-    "example/br-contract",
-    "example/ld-contract"
+    "example/borrower",
+    "example/lender",
+    "tests/testborrower"
 ]

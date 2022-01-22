@@ -41,7 +41,7 @@ fn max_flash_loan() {
 
 #[no_mangle]
 fn call() {
-    let initial_supportted_tokens: Vec<(Address, U256)> =
-        runtime::get_named_arg("initial_supportted_tokens");
-    let _lender = EIP3156LENDER::install(initial_supportted_tokens).unwrap_or_revert();
+    let initial_supported_tokens: Vec<(Address, U256)> =
+        runtime::get_named_arg("initial_supported_tokens");
+    let _lender = EIP3156LENDER::install(initial_supported_tokens).unwrap_or_revert();
 }

@@ -6,7 +6,7 @@ mod tokens;
 // mod eip3156borrower;
 extern crate alloc;
 
-use crate::constants::{LOAN_FEE_KEY_NAME, SUPPORT_TOKENS_KEY_NAME};
+use crate::constants::{LENDER_PACKAGE_NAME, LOAN_FEE_KEY_NAME, SUPPORT_TOKENS_KEY_NAME};
 use casper_contract::{
     contract_api::{runtime, storage},
     unwrap_or_revert::UnwrapOrRevert,
@@ -92,11 +92,9 @@ impl EIP3156LENDER {
     }
 
     /// This should be called from within `fn call()` of your contract.
-    pub fn install(
-        initial_supportted_tokens: Vec<(Address, U256)>,
-    ) -> Result<EIP3156LENDER, Error> {
+    pub fn install(initial_supported_tokens: Vec<(Address, U256)>) -> Result<EIP3156LENDER, Error> {
         let default_entry_points = entry_points::default();
-        EIP3156LENDER::install_custom(initial_supportted_tokens, default_entry_points)
+        EIP3156LENDER::install_custom(initial_supported_tokens, default_entry_points)
     }
 
     /// Installs the ERC20 contract with a custom set of entry points.
@@ -108,14 +106,14 @@ impl EIP3156LENDER {
     /// lead to problems with integrators such as wallets, and exchanges.
     #[doc(hidden)]
     pub fn install_custom(
-        initial_supportted_tokens: Vec<(Address, U256)>,
+        initial_supported_tokens: Vec<(Address, U256)>,
         entry_points: EntryPoints,
     ) -> Result<EIP3156LENDER, Error> {
         let loan_fee_uref = storage::new_dictionary(LOAN_FEE_KEY_NAME).unwrap_or_revert();
         let loan_fee_key = Key::from(loan_fee_uref);
 
         let mut supported_tokens: Vec<Address> = vec![];
-        for (_, n) in initial_supportted_tokens.into_iter().enumerate() {
+        for (_, n) in initial_supported_tokens.into_iter().enumerate() {
             supported_tokens.push(n.0); //fill vec of tokens address
             tokens::write_loan_fee_to(loan_fee_uref, n.0, n.1) //fill dictionary with loan fee and token pair
         }
@@ -128,12 +126,12 @@ impl EIP3156LENDER {
         named_keys.insert(SUPPORT_TOKENS_KEY_NAME.to_string(), supported_tokens_key);
         named_keys.insert(LOAN_FEE_KEY_NAME.to_string(), loan_fee_key);
 
-        let (contract_hash, _version) =
-            storage::new_locked_contract(entry_points, Some(named_keys), None, None);
+        let (contract_package_hash, _) = storage::create_contract_package_at_hash();
 
-        // Hash of the installed contract will be reachable through named keys.
-        runtime::put_key("LENDER", Key::from(contract_hash));
+        storage::add_contract_version(contract_package_hash, entry_points, named_keys);
+
         runtime::remove_key(LOAN_FEE_KEY_NAME);
+        runtime::put_key(LENDER_PACKAGE_NAME, contract_package_hash.into());
 
         Ok(EIP3156LENDER::new(supported_tokens_uref, loan_fee_uref))
     }

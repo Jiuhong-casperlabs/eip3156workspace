@@ -6,3 +6,4 @@ pub const AMOUNT_RUNTIME_ARG_NAME: &str = "amount";
 pub const TOKEN_RUNTIME_ARG_NAME: &str = "token";
 pub const INITIATOR_RUNTIME_ARG_NAME: &str = "initiator";
 pub const FEE_RUNTIME_ARG_NAME: &str = "fee";
+pub const PACKAGE_NAME: &str = "BORROWER";
