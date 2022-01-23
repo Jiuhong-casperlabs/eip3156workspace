@@ -5,8 +5,9 @@ mod tests {
         DEFAULT_ACCOUNT_INITIAL_BALANCE, DEFAULT_GENESIS_CONFIG, DEFAULT_GENESIS_CONFIG_HASH,
         DEFAULT_PAYMENT,
     };
-    use casper_execution_engine::core::engine_state::{
-        run_genesis_request::RunGenesisRequest, GenesisAccount,
+    use casper_execution_engine::{
+        core::engine_state::{run_genesis_request::RunGenesisRequest, GenesisAccount},
+        storage,
     };
     use casper_types::{
         account::AccountHash, bytesrepr::ToBytes, runtime_args, CLValue, ContractPackageHash, Key,
@@ -25,12 +26,12 @@ mod tests {
 
     const BORROWER_PACKAGE_HASH_KEY: &str = "BORROWER";
 
-    const ERC20_PACKAGE_KEY: &str = "erc20_token_contract_1";
+    const ERC20_CONTRACT_KEY: &str = "erc20_token_contract_1";
+    const ERC20_PACKAGE_KEY: &str = "erc20_package_hash";
 
     struct TestFixture {
         test_builder: InMemoryWasmTestBuilder,
         account_address: AccountHash,
-        erc20_package_hash_key: Key,
         lender_package_hash_key: Key,
         borrower_package_hash_key: Key,
     }
@@ -91,7 +92,6 @@ mod tests {
 
             // ========= install erc20 contract end========= //
 
-            // ========= install lender contract start========= //
             //get account
             let account = test_builder
                 .query(None, Key::Account(account_address), &[])
@@ -100,16 +100,18 @@ mod tests {
                 .cloned()
                 .expect("should be account");
 
+            // ========= install lender contract start========= //
+
             //get erc20 package hash
-            let erc20_package_hash = account
+            let erc20_package_hash_key = account
                 .named_keys()
                 .get(ERC20_PACKAGE_KEY)
-                .expect("should have erc20 package");
+                .expect("should have erc20 contract");
 
             // install lender
             let lender_installer_session_code = LENDER_WASM;
             let lender_installer_session_args = runtime_args! {
-                ARG_INITIAL_SUPPORTED_TOKENS => vec![(*erc20_package_hash, U256::from(10))]
+                ARG_INITIAL_SUPPORTED_TOKENS => vec![(*erc20_package_hash_key, U256::from(80000))]
             };
             let installer_payment_args = runtime_args! {
                 ARG_AMOUNT => *DEFAULT_PAYMENT
@@ -129,15 +131,6 @@ mod tests {
                 .expect_success();
 
             // ========= install lender contract end========= //
-
-            // ========= install borrower contract start========= //
-            //get account
-            let account = test_builder
-                .query(None, Key::Account(account_address), &[])
-                .expect("should query account")
-                .as_account()
-                .cloned()
-                .expect("should be account");
 
             //get lender package hash
             let lender_package_hash = account
@@ -172,23 +165,14 @@ mod tests {
 
             // ========= install borrower contract end========= //
 
-            // get account
-            let account = test_builder
-                .query(None, Key::Account(account_address), &[])
-                .expect("should query account")
-                .as_account()
-                .cloned()
-                .expect("should be account");
-
             // get named keys
-
             let named_keys = account.named_keys();
-            // println!("named keys are {:?}", named_keys);
+            println!("named keys are {:?}", named_keys);
 
-            let erc20_package_hash_key = *(account
+            let erc20_contract_hash_key = *(account
                 .named_keys()
-                .get(ERC20_PACKAGE_KEY)
-                .expect("should have package hash"));
+                .get(ERC20_CONTRACT_KEY)
+                .expect("should have contract hash"));
 
             let lender_package_hash_key = *(account
                 .named_keys()
@@ -199,33 +183,30 @@ mod tests {
                 .named_keys()
                 .get(BORROWER_PACKAGE_HASH_KEY)
                 .expect("should have package hash"));
+
+            //get lender balance
+
             let test_context = Self {
                 test_builder,
                 account_address,
-                erc20_package_hash_key,
+                erc20_contract_hash_key,
+                erc20_package_hash_key: *erc20_package_hash_key,
                 lender_package_hash_key,
                 borrower_package_hash_key,
             };
-
             test_context
         }
 
         fn tranfer_erc20(&mut self, to_lender: bool, amount: U256) {
-            // get erc20 package hash
-            let erc20_package_hash = self
-                .erc20_package_hash_key
-                .into_hash()
-                .map(ContractPackageHash::new)
-                .expect("should be hash");
+            // transfer erc20 to lender
 
             let deploy = DeployItemBuilder::new()
                 .with_address(self.account_address)
-                .with_stored_versioned_contract_by_hash(
-                    erc20_package_hash.value(),
-                    None,
+                .with_stored_session_named_key(
+                    "erc20_token_contract_1",
                     "transfer",
                     runtime_args! {
-                        "recipient" =>if to_lender {self.lender_package_hash_key} else {self.borrower_package_hash_key},
+                        "recipient" =>  if to_lender {self.lender_package_hash_key} else {self.borrower_package_hash_key},
                         "amount" => amount
                     },
                 )
@@ -233,93 +214,12 @@ mod tests {
                 .with_authorization_keys(&[self.account_address])
                 .with_deploy_hash([42; 32])
                 .build();
-            ExecuteRequestBuilder::new().push_deploy(deploy).build();
 
-            // get balance
-            let balance_uref = self
-                .test_builder
-                .query(
-                    None,
-                    Key::Account(self.account_address),
-                    &[ERC20_PACKAGE_KEY.to_string()],
-                )
-                .expect("should have validator slots")
-                .as_contract()
-                .expect("should be contract")
-                .clone()
-                .take_named_keys()
-                .get("balances")
-                .unwrap()
-                .clone()
-                .as_uref()
-                .unwrap()
-                .clone();
-            println!("balance_uref is {:?}", balance_uref);
-
-            let lender = if to_lender {
-                self.lender_package_hash_key
-            } else {
-                self.borrower_package_hash_key
-            };
-
-            let item_key = self
-                .test_builder
-                .query(
-                    None,
-                    Key::Account(self.account_address),
-                    &[ERC20_PACKAGE_KEY.to_string()],
-                )
-                .expect("should have validator slots")
-                .as_contract()
-                .unwrap()
-                .clone()
-                .take_named_keys();
-            //names keys under erc20 contract
-            println!("=================");
-            println!("item_keys is {:?}", item_key);
-            println!("=================");
-            let account = self
-                .test_builder
-                .query(None, Key::Account(self.account_address), &[])
-                .expect("should query account")
-                .as_account()
-                .cloned()
-                .expect("should be account");
-
-            // get named keys
-
-            let named_keys = account.named_keys();
-            println!("named keys under account is {:?}", named_keys);
-
-            // let item_key = base64::encode(&lender.to_bytes().unwrap());
-            // let item_key: String = self
-            //     .test_builder
-            //     .query(
-            //         None,
-            //         Key::Account(self.account_address),
-            //         &[
-            //             ERC20_PACKAGE_KEY.to_string(),
-            //             "balance_item_key".to_string(),
-            //         ],
-            //     )
-            //     .expect("should have validator slots")
-            //     .as_cl_value()
-            //     .unwrap()
-            //     .clone()
-            //     .into_t()
-            //     .unwrap();
-
-            // let value: U256 = self
-            //     .test_builder
-            //     .query_dictionary_item(None, balance_uref, &item_key)
-            //     .ok()
-            //     .unwrap()
-            //     .as_cl_value()
-            //     .unwrap()
-            //     .clone()
-            //     .into_t()
-            //     .unwrap();
-            // print!("{}", value);
+            let execute_request = ExecuteRequestBuilder::from_deploy_item(deploy).build();
+            self.test_builder
+                .exec(execute_request)
+                .commit()
+                .expect_success();
         }
 
         fn flash_borrow(&mut self) {
@@ -336,7 +236,7 @@ mod tests {
                     None,
                     "flash_borrow",
                     runtime_args! {
-                        "token" => self.erc20_package_hash_key,
+                        "token" => self.lender_package_hash_key,
                         "amount" => U256::from(2222),
                     },
                 )
@@ -347,18 +247,18 @@ mod tests {
             ExecuteRequestBuilder::new().push_deploy(deploy).build();
         }
 
-        pub fn balance_of(&self) {
+        pub fn balance_of(&self, lender: bool) {
             //get balance_uref
-            let balance_uref = self
+            let balance_uref1 = self
                 .test_builder
                 .query(
                     None,
                     Key::Account(self.account_address),
-                    &[ERC20_PACKAGE_KEY.to_string()],
+                    &[ERC20_CONTRACT_KEY.to_string()],
                 )
                 .expect("should have validator slots")
                 .as_contract()
-                .expect("should be contract")
+                .expect("should be contractpackage")
                 .clone()
                 .take_named_keys()
                 .get("balances")
@@ -367,29 +267,21 @@ mod tests {
                 .as_uref()
                 .unwrap()
                 .clone();
-            println!("balance_uref is {:?}", balance_uref);
-            // .as_cl_value()
-            // .expect("should be CLValue")
-            // .clone()
-            // .into_t()
-            // .expect("should be u32");
-            // let a: URef = CLValue::into_t();
+            // println!("balance_uref is {:?}", balance_uref1);
 
-            // println!("value: {:?}", balance_uref);
-            // .as_uref()
-            // .cloned()
-            // .expect("should be account");
-
-            // let item_key = base64::encode(&account.to_bytes().unwrap());
-            let lender = self.borrower_package_hash_key;
-
-            let item_key = base64::encode(&lender.to_bytes().unwrap());
-            println!("item_key is: {}", item_key);
-            println!("lender is {}", lender);
+            let dic_item_key = base64::encode(
+                if lender {
+                    &self.lender_package_hash_key
+                } else {
+                    &self.borrower_package_hash_key
+                }
+                .to_bytes()
+                .unwrap(),
+            );
 
             let value: U256 = self
                 .test_builder
-                .query_dictionary_item(None, balance_uref, &item_key)
+                .query_dictionary_item(None, balance_uref1, &dic_item_key)
                 .ok()
                 .unwrap()
                 .as_cl_value()
@@ -397,84 +289,31 @@ mod tests {
                 .clone()
                 .into_t()
                 .unwrap();
-            print!("{}", value);
-
-            // Some(value.into_t::<U256>().unwrap())
-        }
-
-        fn get_balance(&mut self, from_lender: bool) {
-            // get erc20 package hash
-            let erc20_package_hash = self
-                .erc20_package_hash_key
-                .into_hash()
-                .map(ContractPackageHash::new)
-                .expect("should be hash");
-
-            let deploy = DeployItemBuilder::new()
-                .with_address(self.account_address)
-                .with_stored_versioned_contract_by_hash(
-                    erc20_package_hash.value(),
-                    None,
-                    "balance_of",
-                    runtime_args! {
-                        "address" =>if from_lender {self.lender_package_hash_key} else {self.borrower_package_hash_key},
-                    },
-                )
-                .with_empty_payment_bytes(runtime_args! { ARG_AMOUNT => *DEFAULT_PAYMENT, })
-                .with_authorization_keys(&[self.account_address])
-                .with_deploy_hash([42; 32])
-                .build();
-            let a = ExecuteRequestBuilder::new().push_deploy(deploy).build();
+            println!("herherhereh is {}", value);
         }
     }
 
     #[test]
     fn transfer_token_to_lender() {
-        // transfer 50000 to lender
         let to_lender = true;
         let amount = U256::from(50000);
         let mut a = TestFixture::deploy();
-        let b = a.tranfer_erc20(to_lender, amount);
+        a.tranfer_erc20(to_lender, amount);
 
         // get balance of lender
-        a.balance_of();
-
-        //transfer 20 to borrower for flashfee
-        // let to_lender = false;
-        // let amount = U256::from(10);
-        // a.tranfer_erc20(to_lender, amount);
-
-        //invoke flash_borrow of borrower
-        // TestFixture::deploy().flash_borrow();
-
-        // get lender balance
-
-        // get borrower balance
+        a.balance_of(to_lender);
     }
 
     #[test]
-    fn test_balance() {
-        // TestFixture::deploy().balance_of();
-    }
-    // #[test]
-    // fn should_increment_with_direct_call() {
-    //     let mut fixture = TestFixture::deploy();
-    //     let use_stored_session = true;
-    //     for expected_value in 1..=3 {
-    //         fixture.increment_counter(use_stored_session);
-    //         assert_eq!(fixture.get_counter(), expected_value);
-    //     }
-    // }
+    fn transfer_token_to_borrower() {
+        let to_lender = false;
+        let amount = U256::from(10);
+        let mut a = TestFixture::deploy();
+        a.tranfer_erc20(to_lender, amount);
 
-    // #[test]
-    // fn should_increment_with_counter_call_contract() {
-    //     let mut fixture = TestFixture::deploy();
-    //     let use_stored_session = false;
-    //     for expected_value in 1..=3 {
-    //         fixture.increment_counter(use_stored_session);
-    //         assert_eq!(fixture.get_counter(), expected_value);
-    //     }
-    // }
+        // get balance of lender
+        a.balance_of(to_lender);
+    }
 }
 
 fn main() {
