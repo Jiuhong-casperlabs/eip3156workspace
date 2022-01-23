@@ -106,12 +106,13 @@ mod tests {
             let erc20_package_hash_key = account
                 .named_keys()
                 .get(ERC20_PACKAGE_KEY)
-                .expect("should have erc20 contract");
+                .expect("should have erc20 contract")
+                .clone();
 
             // install lender
             let lender_installer_session_code = LENDER_WASM;
             let lender_installer_session_args = runtime_args! {
-                ARG_INITIAL_SUPPORTED_TOKENS => vec![(*erc20_package_hash_key, U256::from(80000))]
+                ARG_INITIAL_SUPPORTED_TOKENS => vec![(erc20_package_hash_key, U256::from(80000))]
             };
             let installer_payment_args = runtime_args! {
                 ARG_AMOUNT => *DEFAULT_PAYMENT
@@ -190,7 +191,7 @@ mod tests {
                 test_builder,
                 account_address,
                 erc20_contract_hash_key,
-                erc20_package_hash_key: *erc20_package_hash_key,
+                erc20_package_hash_key,
                 lender_package_hash_key,
                 borrower_package_hash_key,
             };
