@@ -47,8 +47,11 @@ pub const MAX_FLASH_LOAN_ENTRY_POINT_NAME: &str = "max_flash_loan";
 pub const FLASH_FEE_ENTRY_POINT_NAME: &str = "flash_fee";
 /// Name of `flash_loan` entry point.
 pub const FLASH_LOAN_ENTRY_POINT_NAME: &str = "flash_loan";
+/// Name of `receiver` argument.
 pub const RECEIVER_RUNTIME_ARG_NAME: &str = "receiver";
+/// Name of `token` argument.
 pub const TOKEN_RUNTIME_ARG_NAME: &str = "token";
+/// Name of `data` argument.
 pub const DATA_RUNTIME_ARG_NAME: &str = "data";
 // EIP3156 end
 

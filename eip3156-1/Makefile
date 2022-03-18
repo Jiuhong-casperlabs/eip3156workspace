@@ -12,8 +12,6 @@ build-contracts:
 	wasm-strip target/wasm32-unknown-unknown/release/minter.wasm 2>/dev/null | true
 	wasm-strip target/wasm32-unknown-unknown/release/eip3156_test_call.wasm 2>/dev/null | true
 
-
-
 test-only:
 	cd tests/testing && cargo test
 

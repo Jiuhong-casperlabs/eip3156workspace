@@ -28,9 +28,6 @@ mod flashmint;
 // EIP3156 end
 
 use alloc::string::{String, ToString};
-// test
-use alloc::collections::BTreeMap;
-// test
 // EIP3156 start
 use flashmint::Error as flashmintError;
 // EIP3156 end

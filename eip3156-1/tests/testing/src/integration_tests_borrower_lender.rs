@@ -5,9 +5,8 @@ mod tests {
         DEFAULT_ACCOUNT_INITIAL_BALANCE, DEFAULT_GENESIS_CONFIG, DEFAULT_GENESIS_CONFIG_HASH,
         DEFAULT_PAYMENT,
     };
-    use casper_execution_engine::{
-        core::engine_state::{run_genesis_request::RunGenesisRequest, GenesisAccount},
-        storage,
+    use casper_execution_engine::core::engine_state::{
+        run_genesis_request::RunGenesisRequest, GenesisAccount,
     };
 
     use casper_execution_engine::core::{
@@ -17,8 +16,8 @@ mod tests {
     use casper_types::{
         account::AccountHash,
         bytesrepr::{FromBytes, ToBytes},
-        runtime_args, ApiError, CLTyped, CLValue, Contract, ContractHash, ContractPackageHash, Key,
-        Motes, PublicKey, RuntimeArgs, SecretKey, URef, U256, U512,
+        runtime_args, ApiError, CLTyped, ContractPackageHash, Key, Motes, PublicKey, RuntimeArgs,
+        SecretKey, U256, U512,
     };
 
     const ERC20_WASM: &str =
@@ -116,11 +115,10 @@ mod tests {
         // ========= install lender contract start========= //
 
         //get erc20 package hash
-        let erc20_package_hash_key = account
+        let erc20_package_hash_key = *account
             .named_keys()
             .get(ERC20_PACKAGE_KEY)
-            .expect("should have erc20 contract")
-            .clone();
+            .expect("should have erc20 contract");
 
         let exec_request = {
             ExecuteRequestBuilder::standard(
@@ -187,11 +185,10 @@ mod tests {
 
         // =======install test-call start ============
         //get erc20 package hash
-        let erc20_package_hash_key = account
+        let erc20_package_hash_key = *account
             .named_keys()
             .get(ERC20_PACKAGE_KEY)
-            .expect("should have erc20 contract")
-            .clone();
+            .expect("should have erc20 contract");
 
         //  install test-call
         let exec_request = {
@@ -249,11 +246,7 @@ mod tests {
         builder.exec(execute_request).commit().expect_success();
     }
 
-    fn make_flash_borrow_request(
-        builder: &mut InMemoryWasmTestBuilder,
-        test_context: &TestFixture,
-        amount: U256,
-    ) -> ExecuteRequest {
+    fn make_flash_borrow_request(test_context: &TestFixture, amount: U256) -> ExecuteRequest {
         // get borrower package hash
         let borrower_package_hash = test_context
             .borrower_package_hash_key
@@ -285,7 +278,7 @@ mod tests {
         lender: bool,
     ) -> U256 {
         //get balance_uref
-        let balance_uref = builder
+        let balance_uref = *builder
             .query(
                 None,
                 Key::Account(test_context.account_address),
@@ -300,8 +293,7 @@ mod tests {
             .unwrap()
             .clone()
             .as_uref()
-            .unwrap()
-            .clone();
+            .unwrap();
 
         let dic_item_key = base64::encode(
             if lender {
@@ -431,7 +423,7 @@ mod tests {
 
         // ===============  flash_borrow start ==========================
         let amount = U256::from(4000u128);
-        let execute_request = make_flash_borrow_request(&mut builder, &test_context, amount);
+        let execute_request = make_flash_borrow_request(&test_context, amount);
 
         builder.exec(execute_request).commit().expect_success();
         // ===============  flash_borrow end ==========================
@@ -490,7 +482,7 @@ mod tests {
 
         // ===============  flash_borrow start ==========================
         let amount = U256::from(5001u128);
-        let execute_request = make_flash_borrow_request(&mut builder, &test_context, amount);
+        let execute_request = make_flash_borrow_request(&test_context, amount);
 
         builder.exec(execute_request).commit();
 
@@ -554,7 +546,7 @@ mod tests {
 
         // ===============  flash_borrow start ==========================
         let amount = U256::from(4000u128);
-        let execute_request = make_flash_borrow_request(&mut builder, &test_context, amount);
+        let execute_request = make_flash_borrow_request(&test_context, amount);
 
         builder.exec(execute_request).commit();
 

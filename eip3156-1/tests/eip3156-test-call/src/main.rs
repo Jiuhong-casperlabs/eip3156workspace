@@ -12,28 +12,12 @@ use casper_contract::{
     self,
     contract_api::{runtime, storage},
 };
-use casper_erc20::{
-    constants::{
-        AMOUNT_RUNTIME_ARG_NAME, APPROVE_ENTRY_POINT_NAME, RECIPIENT_RUNTIME_ARG_NAME,
-        TRANSFER_ENTRY_POINT_NAME, TRANSFER_FROM_ENTRY_POINT_NAME,
-    },
-    Address,
-};
+use casper_erc20::Address;
 use casper_types::{
-    bytesrepr::ToBytes, runtime_args, CLTyped, ContractHash, ContractPackageHash, EntryPoint,
-    EntryPointAccess, EntryPointType, EntryPoints, Key, Parameter, RuntimeArgs, U256,
+    bytesrepr::ToBytes, runtime_args, CLTyped, ContractPackageHash, EntryPoint, EntryPointAccess,
+    EntryPointType, EntryPoints, Key, Parameter, RuntimeArgs, U256,
 };
 
-const CHECK_TOTAL_SUPPLY_ENTRY_POINT_NAME: &str = "check_total_supply";
-const CHECK_BALANCE_OF_ENTRY_POINT_NAME: &str = "check_balance_of";
-const TRANSFER_AS_STORED_CONTRACT_ENTRY_POINT_NAME: &str = "transfer_as_stored_contract";
-const APPROVE_AS_STORED_CONTRACT_ENTRY_POINT_NAME: &str = "approve_as_stored_contract";
-const TRANSFER_FROM_AS_STORED_CONTRACT_ENTRY_POINT_NAME: &str = "transfer_from_as_stored_contract";
-const CHECK_ALLOWANCE_OF_ENTRY_POINT_NAME: &str = "check_allowance_of";
-const TOKEN_CONTRACT_RUNTIME_ARG_NAME: &str = "token_contract";
-const ADDRESS_RUNTIME_ARG_NAME: &str = "address";
-const OWNER_RUNTIME_ARG_NAME: &str = "owner";
-const SPENDER_RUNTIME_ARG_NAME: &str = "spender";
 const RESULT_KEY: &str = "result";
 const TEST_CALL_KEY: &str = "test_call_package_hash";
 

@@ -5,9 +5,8 @@ mod tests {
         DEFAULT_ACCOUNT_INITIAL_BALANCE, DEFAULT_GENESIS_CONFIG, DEFAULT_GENESIS_CONFIG_HASH,
         DEFAULT_PAYMENT,
     };
-    use casper_execution_engine::{
-        core::engine_state::{run_genesis_request::RunGenesisRequest, GenesisAccount},
-        storage,
+    use casper_execution_engine::core::engine_state::{
+        run_genesis_request::RunGenesisRequest, GenesisAccount,
     };
 
     use casper_execution_engine::core::{
@@ -17,33 +16,18 @@ mod tests {
     use casper_types::{
         account::AccountHash,
         bytesrepr::{FromBytes, ToBytes},
-        runtime_args, ApiError, CLTyped, CLValue, Contract, ContractHash, ContractPackageHash, Key,
-        Motes, PublicKey, RuntimeArgs, SecretKey, URef, U256, U512,
+        runtime_args, ApiError, CLTyped, ContractHash, ContractPackageHash, Key, Motes, PublicKey,
+        RuntimeArgs, SecretKey, U256, U512,
     };
 
-    pub enum Error {
-        /// ERC20 contract called from within an invalid context.
-        InvalidContext,
-        /// Spender does not have enough balance.
-        InsufficientBalance,
-        /// Spender does not have enough allowance approved.
-        InsufficientAllowance,
-        /// Operation would cause an integer overflow.
-        Overflow,
-        /// User error.
-        User(u16),
-    }
     // const ERC20_WASM: &str =
     //     "/home/jh/caspereco/erc20/target/wasm32-unknown-unknown/release/erc20_token.wasm";
     const MINTER_WASM: &str =
         "/home/jh/mywork/eip3156workspace/eip3156-1/target/wasm32-unknown-unknown/release/minter.wasm";
     const BORROWER_WASM: &str = "borrower.wasm";
     const TEST_CALL_WASM: &str = "eip3156_test_call.wasm";
-    const ARG_INITIAL_SUPPORTED_TOKENS: &str = "initial_supported_tokens";
 
     const MINTER_ADDRESS: &str = "lender_address";
-
-    const MINTER_PACKAGE_HASH_KEY: &str = "erc20_package_hash";
 
     const BORROWER_PACKAGE_HASH_KEY: &str = "BORROWER";
 
@@ -234,11 +218,7 @@ mod tests {
         builder.exec(execute_request).commit().expect_success();
     }
 
-    fn make_flash_borrow_request(
-        builder: &mut InMemoryWasmTestBuilder,
-        test_context: &TestFixture,
-        amount: U256,
-    ) -> ExecuteRequest {
+    fn make_flash_borrow_request(test_context: &TestFixture, amount: U256) -> ExecuteRequest {
         // get borrower package hash
         let borrower_package_hash = test_context
             .borrower_package_hash_key
@@ -266,7 +246,7 @@ mod tests {
 
     fn balance_of(builder: &mut InMemoryWasmTestBuilder, test_context: &TestFixture) -> U256 {
         //get balance_uref
-        let balance_uref = builder
+        let balance_uref = *builder
             .query(
                 None,
                 Key::Account(test_context.account_address),
@@ -281,8 +261,7 @@ mod tests {
             .unwrap()
             .clone()
             .as_uref()
-            .unwrap()
-            .clone();
+            .unwrap();
 
         let dic_item_key =
             base64::encode(test_context.borrower_package_hash_key.to_bytes().unwrap());
@@ -356,7 +335,7 @@ mod tests {
 
         // flash_borrow
         let amount = U256::from(22200u128);
-        let execute_request = make_flash_borrow_request(&mut builder, &test_context, amount);
+        let execute_request = make_flash_borrow_request(&test_context, amount);
 
         builder.exec(execute_request).commit().expect_success();
 
@@ -392,7 +371,7 @@ mod tests {
 
         // flash_borrow
         let amount = U256::from(23200u128);
-        let execute_request = make_flash_borrow_request(&mut builder, &test_context, amount);
+        let execute_request = make_flash_borrow_request(&test_context, amount);
 
         builder.exec(execute_request).commit();
         let error = builder.get_error().expect("should have error");
@@ -432,7 +411,7 @@ mod tests {
 
         // flash_borrow
         let amount = U256::from(1u128);
-        let execute_request = make_flash_borrow_request(&mut builder, &test_context, amount);
+        let execute_request = make_flash_borrow_request(&test_context, amount);
 
         builder.exec(execute_request).commit();
         let error = builder.get_error().expect("should have error");

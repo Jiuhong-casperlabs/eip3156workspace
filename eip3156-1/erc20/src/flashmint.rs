@@ -86,9 +86,9 @@ pub(crate) fn flash_loan(
     let result = erc20.mint(receiver, amount);
     if result.is_err() {
         let erc20error = result.err().unwrap();
-        match erc20error {
-            ERC20Error::Overflow => return Err(Error::FlashMinterOverflow),
-            _ => (),
+
+        if let ERC20Error::Overflow = erc20error {
+            return Err(Error::FlashMinterOverflow);
         }
     }
 
@@ -128,7 +128,7 @@ pub(crate) fn flash_loan(
         return Err(Error::FlashMinterRepayNotApproved);
     }
 
-    erc20.approve(get_top_caller_address(), allowance - (amount + flashfee));
+    let _ = erc20.approve(get_top_caller_address(), allowance - (amount + flashfee));
 
     let result = erc20.burn(receiver, amount + flashfee);
     if result.is_err() {
