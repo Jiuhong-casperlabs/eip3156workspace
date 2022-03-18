@@ -19,6 +19,7 @@ use core::convert::TryFrom;
 // "FlashBorrower: Untrusted loan initiator"
 
 /// error for flashmint
+#[derive(Debug)]
 pub enum Error {
     /// error for flashmint
     FlashMinterUnsupportedCurrency,
@@ -42,6 +43,10 @@ pub enum Error {
     FlashBorrowerUntrustedLoanInitiator,
     /// error for flashmint
     IncorrectAddress,
+    /// error for flashmint
+    FlashMinterInsufficientBalance,
+    /// error for flashmint
+    FlashMinterOverflow,
 }
 
 const ERROR_FLASH_MINTER_UNSUPPORTED_CURRENCY: u16 = u16::MAX - 100;
@@ -55,6 +60,9 @@ const ERROR_IERC3156_CALLBACK_FAILED: u16 = u16::MAX - 107;
 const ERROR_FLASH_BORROWER_UNTRUSTED_FENDER: u16 = u16::MAX - 108;
 const ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR: u16 = u16::MAX - 109;
 const ERROR_INCORRECT_ADDRESS: u16 = u16::MAX - 110;
+const ERROR_INSUFFICIENT_BALANCE: u16 = u16::MAX - 111;
+const ERROR_OVERFLOW: u16 = u16::MAX - 112;
+///65535 = u16::MAX
 
 impl From<Error> for ApiError {
     fn from(error: Error) -> Self {
@@ -72,6 +80,8 @@ impl From<Error> for ApiError {
                 ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR
             }
             Error::IncorrectAddress => ERROR_INCORRECT_ADDRESS,
+            Error::FlashMinterInsufficientBalance => ERROR_INSUFFICIENT_BALANCE,
+            Error::FlashMinterOverflow => ERROR_OVERFLOW,
         };
         ApiError::User(user_error)
     }

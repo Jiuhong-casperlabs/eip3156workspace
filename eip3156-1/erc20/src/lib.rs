@@ -26,18 +26,21 @@ mod total_supply;
 // EIP3156 start
 mod flashmint;
 // EIP3156 end
-// mod flashmint::error_flashmint;
 
 use alloc::string::{String, ToString};
-
+// test
+use alloc::collections::BTreeMap;
+// test
+// EIP3156 start
 use flashmint::Error as flashmintError;
+// EIP3156 end
 use once_cell::unsync::OnceCell;
 
 use casper_contract::{
     contract_api::{runtime, storage},
     unwrap_or_revert::UnwrapOrRevert,
 };
-use casper_types::{bytesrepr::Bytes, contracts::NamedKeys, EntryPoints, Key, URef, U256};
+use casper_types::{contracts::NamedKeys, EntryPoints, Key, URef, U256};
 
 pub use address::Address;
 use constants::{
@@ -118,7 +121,9 @@ impl ERC20 {
     pub fn install(
         name: String,
         symbol: String,
+        // EIP3156 start
         fee: U256,
+        // EIP3156 end
         decimals: u8,
         initial_supply: U256,
     ) -> Result<ERC20, Error> {
@@ -191,13 +196,8 @@ impl ERC20 {
         receiver: Address,
         token: Address,
         amount: U256,
-        data: Bytes,
+        data: String,
     ) -> Result<bool, flashmintError> {
-        // require(
-        //     token == address(this),
-        //     "FlashMinter: Unsupported currency"
-        // );
-
         flashmint::flash_loan(self, receiver, token, amount, data)
     }
 
@@ -276,12 +276,14 @@ impl ERC20 {
                 .checked_sub(amount)
                 .ok_or(Error::InsufficientBalance)?
         };
+
         let new_total_supply = {
             let total_supply = self.read_total_supply();
             total_supply.checked_sub(amount).ok_or(Error::Overflow)?
         };
         self.write_balance(owner, new_balance);
         self.write_total_supply(new_total_supply);
+
         Ok(())
     }
 
@@ -361,8 +363,12 @@ impl ERC20 {
         named_keys.insert(ALLOWANCES_KEY_NAME.to_string(), allowances_dictionary_key);
         named_keys.insert(TOTAL_SUPPLY_KEY_NAME.to_string(), total_supply_key);
 
-        let (contract_hash, _version) =
-            storage::new_locked_contract(entry_points, Some(named_keys), None, None);
+        let (contract_hash, _version) = storage::new_locked_contract(
+            entry_points,
+            Some(named_keys),
+            Some("erc20_package_hash".to_string()),
+            None,
+        );
 
         // Hash of the installed contract will be reachable through named keys.
         runtime::put_key(contract_key_name, Key::from(contract_hash));

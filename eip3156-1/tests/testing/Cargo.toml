@@ -12,7 +12,13 @@ casper-types = "1.4.5"
 base64 = "0.13.0"
 
 [[bin]]
-name = "integration-tests"
-path = "src/integration_tests.rs"
+name = "integration-tests-borrower-lender"
+path = "src/integration_tests_borrower_lender.rs"
+bench = false
+doctest = false
+
+[[bin]]
+name = "integration-tests-borrower-minter"
+path = "src/integration_tests_borrower_minter.rs"
 bench = false
 doctest = false

@@ -1,0 +1,19 @@
+[package]
+name = "eip3156-test-call"
+version = "0.1.0"
+edition = "2018"
+
+[[bin]]
+name = "eip3156_test_call"
+path = "src/main.rs"
+bench = false
+doctest = false
+test = false
+
+[dependencies]
+casper-contract = "1.4.3"
+casper-types = "1.4.6"
+casper-erc20 = { path = "../../erc20" }
+
+[features]
+default = ["casper-contract/std", "casper-types/std", "casper-erc20/std"]

@@ -28,7 +28,6 @@ pub enum Error {
     IERC3156CallbackFailed,
     FlashBorrowerUntrustedFender,
     FlashBorrowerUntrustedLoanInitiator,
-    MYTESTERROR,
 }
 
 ///65435
@@ -51,8 +50,6 @@ const ERROR_IERC3156_CALLBACK_FAILED: u16 = u16::MAX - 107;
 const ERROR_FLASH_BORROWER_UNTRUSTED_FENDER: u16 = u16::MAX - 108;
 ///65535 - 109 = 65426
 const ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR: u16 = u16::MAX - 109;
-///65535 - 110 = 65425
-const ERROR_MYTEST_ERROR: u16 = u16::MAX - 110;
 
 impl From<Error> for ApiError {
     fn from(error: Error) -> Self {
@@ -69,7 +66,6 @@ impl From<Error> for ApiError {
             Error::FlashBorrowerUntrustedLoanInitiator => {
                 ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR
             }
-            Error::MYTESTERROR => ERROR_MYTEST_ERROR,
         };
         ApiError::User(user_error)
     }

@@ -69,7 +69,7 @@ pub fn flash_borrow(lender: Address, token: Address, amount: U256) -> Result<(),
     };
 
     let mut stacks = runtime::get_call_stack();
-    // currect stack
+    // current stack
     let topstack = stacks.pop().unwrap();
 
     let topaddress = call_stack_element_to_address(topstack);
@@ -118,10 +118,6 @@ pub fn flash_borrow(lender: Address, token: Address, amount: U256) -> Result<(),
             "amount" => _allowance + _repayment,
         },
     );
-
-    // if approve_result.is_err() {
-    //     return Err(Error::ERC20ApproveFailed);
-    // }
 
     // lender.flashLoan(this, token, amount, data);
     let result: bool = runtime::call_versioned_contract(

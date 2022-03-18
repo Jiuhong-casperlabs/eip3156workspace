@@ -5,5 +5,8 @@ members = [
     "flashborrower",
     "example/borrower",
     "example/lender",
-    "tests/testborrower"
+    "example/minter",
+    "tests/eip3156-test-call",
+    "tests/minter-test-call",
+    "tests/testing"
 ]

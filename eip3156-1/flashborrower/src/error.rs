@@ -29,8 +29,6 @@ pub enum Error {
     FlashBorrowerUntrustedFender,
     FlashBorrowerUntrustedLoanInitiator,
     FlashBorrowerInitialFailed,
-    ERC20ApproveFailed,
-    MYTESTERROR,
 }
 
 ///65435
@@ -55,10 +53,6 @@ const ERROR_FLASH_BORROWER_UNTRUSTED_FENDER: u16 = u16::MAX - 108;
 const ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR: u16 = u16::MAX - 109;
 ///65535 - 110 = 65425
 const ERROR_FLASH_BORROWER_INITAL_FAILED: u16 = u16::MAX - 110;
-///65535 - 111 = 65424
-const ERROR_ERC20_APPROVE_FAILED: u16 = u16::MAX - 111;
-///65535 - 112 = 65423
-const ERROR_MYTEST_ERROR: u16 = u16::MAX - 112;
 
 impl From<Error> for ApiError {
     fn from(error: Error) -> Self {
@@ -76,8 +70,6 @@ impl From<Error> for ApiError {
                 ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR
             }
             Error::FlashBorrowerInitialFailed => ERROR_FLASH_BORROWER_INITAL_FAILED,
-            Error::ERC20ApproveFailed => ERROR_ERC20_APPROVE_FAILED,
-            Error::MYTESTERROR => ERROR_MYTEST_ERROR,
         };
         ApiError::User(user_error)
     }

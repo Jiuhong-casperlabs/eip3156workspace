@@ -13,17 +13,21 @@ use crate::{
         AMOUNT_RUNTIME_ARG_NAME,
         APPROVE_ENTRY_POINT_NAME,
         BALANCE_OF_ENTRY_POINT_NAME,
+        // EIP3156
+        DATA_RUNTIME_ARG_NAME,
         DECIMALS_ENTRY_POINT_NAME,
         FLASH_FEE_ENTRY_POINT_NAME,
-        FLASH_LOAN_ENTRY_POINT_NAME, // EIP3156
-        // EIP3156
+        FLASH_LOAN_ENTRY_POINT_NAME,
         LOAN_FEE_ENTRY_POINT_NAME,
         MAX_FLASH_LOAN_ENTRY_POINT_NAME,
+        // EIP3156
         NAME_ENTRY_POINT_NAME,
         OWNER_RUNTIME_ARG_NAME,
+        RECEIVER_RUNTIME_ARG_NAME,
         RECIPIENT_RUNTIME_ARG_NAME,
         SPENDER_RUNTIME_ARG_NAME,
         SYMBOL_ENTRY_POINT_NAME,
+        TOKEN_RUNTIME_ARG_NAME,
         TOTAL_SUPPLY_ENTRY_POINT_NAME,
         TRANSFER_ENTRY_POINT_NAME,
         TRANSFER_FROM_ENTRY_POINT_NAME,
@@ -179,7 +183,12 @@ pub fn flash_fee() -> EntryPoint {
 pub fn flash_loan() -> EntryPoint {
     EntryPoint::new(
         String::from(FLASH_LOAN_ENTRY_POINT_NAME),
-        Vec::new(),
+        vec![
+            Parameter::new(RECEIVER_RUNTIME_ARG_NAME, Address::cl_type()),
+            Parameter::new(TOKEN_RUNTIME_ARG_NAME, Address::cl_type()),
+            Parameter::new(AMOUNT_RUNTIME_ARG_NAME, U256::cl_type()),
+            Parameter::new(DATA_RUNTIME_ARG_NAME, String::cl_type()),
+        ],
         bool::cl_type(),
         EntryPointAccess::Public,
         EntryPointType::Contract,

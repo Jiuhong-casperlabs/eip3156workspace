@@ -4,13 +4,14 @@
 pub const NAME_KEY_NAME: &str = "name";
 /// Name of named-key for `symbol`
 pub const SYMBOL_KEY_NAME: &str = "symbol";
-// EIP3156
+// EIP3156 start
 /// Name of named-key for `fee`
 pub const FEE_KEY_NAME: &str = "fee";
+// EIP3156 end
 /// Name of named-key for `decimals`
 pub const DECIMALS_KEY_NAME: &str = "decimals";
 /// Name of named-key for `contract`
-pub const ERC20_TOKEN_CONTRACT_KEY_NAME: &str = "erc20_token_contract1";
+pub const ERC20_TOKEN_CONTRACT_KEY_NAME: &str = "erc20_token_contract";
 /// Name of dictionary-key for `balances`
 pub const BALANCES_KEY_NAME: &str = "balances";
 /// Name of dictionary-key for `allowances`
@@ -36,7 +37,8 @@ pub const ALLOWANCE_ENTRY_POINT_NAME: &str = "allowance";
 pub const TRANSFER_FROM_ENTRY_POINT_NAME: &str = "transfer_from";
 /// Name of `total_supply` entry point.
 pub const TOTAL_SUPPLY_ENTRY_POINT_NAME: &str = "total_supply";
-// EIP3156
+
+// EIP3156 start
 /// Name of `loan_fee` entry point.
 pub const LOAN_FEE_ENTRY_POINT_NAME: &str = "loan_fee";
 /// Name of `max_flash_loan` entry point.
@@ -45,7 +47,10 @@ pub const MAX_FLASH_LOAN_ENTRY_POINT_NAME: &str = "max_flash_loan";
 pub const FLASH_FEE_ENTRY_POINT_NAME: &str = "flash_fee";
 /// Name of `flash_loan` entry point.
 pub const FLASH_LOAN_ENTRY_POINT_NAME: &str = "flash_loan";
-// EIP3156
+pub const RECEIVER_RUNTIME_ARG_NAME: &str = "receiver";
+pub const TOKEN_RUNTIME_ARG_NAME: &str = "token";
+pub const DATA_RUNTIME_ARG_NAME: &str = "data";
+// EIP3156 end
 
 /// Name of `address` runtime argument.
 pub const ADDRESS_RUNTIME_ARG_NAME: &str = "address";

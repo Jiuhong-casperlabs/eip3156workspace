@@ -1,11 +1,11 @@
 //! Implementation details.
+use alloc::string::String;
 use casper_contract::contract_api::runtime;
 use casper_types::{
-    bytesrepr::Bytes, runtime_args, system::CallStackElement, ContractPackageHash, RuntimeArgs,
-    U256,
+    runtime_args, system::CallStackElement, ContractPackageHash, RuntimeArgs, U256,
 };
 
-use crate::{Address, ERC20};
+use crate::{error::Error as ERC20Error, Address, ERC20};
 mod error_flashmint;
 pub use error_flashmint::Error;
 
@@ -60,7 +60,7 @@ fn _flash_fee(amount: U256, fee: U256) -> U256 {
 
 pub(crate) fn flash_fee(erc20: &mut ERC20, token: Address, amount: U256) -> Result<U256, Error> {
     if token != get_top_caller_address() {
-        Err(Error::FlashLenderUnsupportedCurrency)
+        Err(Error::FlashMinterUnsupportedCurrency)
     } else {
         Ok(_flash_fee(amount, erc20.loan_fee()))
     }
@@ -71,21 +71,27 @@ pub(crate) fn flash_loan(
     receiver: Address,
     token: Address,
     amount: U256,
-    data: Bytes,
+    data: String,
 ) -> Result<bool, Error> {
+    // require(
+    //     token == address(this),
+    //     "FlashMinter: Unsupported currency"
+    // );
     if token != get_top_caller_address() {
-        return Err(Error::FlashLenderUnsupportedCurrency);
+        return Err(Error::FlashMinterUnsupportedCurrency);
     }
 
-    let flashfee = match erc20.flash_fee(token, amount) {
-        Ok(a) => a,
-        Err(_) => panic!("123"),
-    };
+    let flashfee = erc20.flash_fee(token, amount).unwrap();
 
     let result = erc20.mint(receiver, amount);
     if result.is_err() {
-        panic!("3456")
+        let erc20error = result.err().unwrap();
+        match erc20error {
+            ERC20Error::Overflow => return Err(Error::FlashMinterOverflow),
+            _ => (),
+        }
     }
+
     // require(
     //     receiver.onFlashLoan(msg.sender, token, amount, fee, data) == CALLBACK_SUCCESS,
     //     "FlashMinter: Callback failed"
@@ -94,44 +100,45 @@ pub(crate) fn flash_loan(
 
     let msgsender = get_second_caller_address();
     let callback_args = runtime_args! {
-        "sender" => msgsender,
+        "initiator" => msgsender,
         "token" => token,
         "amount" => amount,
         "fee" => flashfee,
         "data" => data
     };
 
-    let callback_result: Result<[u8; 32], Error> =
-        runtime::call_versioned_contract(receiver_package_hash, None, "onFlashLoan", callback_args);
-
     let string = "ERC3156FlashBorrower.onFlashLoan";
     let bytes = string.as_bytes();
     let callback_success: [u8; 32] = runtime::blake2b(bytes);
 
-    let callback_hash = match callback_result {
-        Ok(hash) => hash,
-        Err(_) => return Err(Error::FlashMinterCallbackFailed),
-    };
+    let callback_result: [u8; 32] = runtime::call_versioned_contract(
+        receiver_package_hash,
+        None,
+        "on_flash_loan",
+        callback_args,
+    );
 
-    if callback_hash != callback_success {
+    if callback_result != callback_success {
         return Err(Error::FlashMinterCallbackFailed);
     }
 
     // allowance
-    let _allowance: U256 = erc20.allowance(receiver, get_top_caller_address());
-    if _allowance < amount + flashfee {
-        return Err(Error::FlashMinterCallbackFailed);
+    let allowance: U256 = erc20.allowance(receiver, get_top_caller_address());
+    if allowance < amount + flashfee {
+        return Err(Error::FlashMinterRepayNotApproved);
     }
 
-    let result = erc20.approve(get_top_caller_address(), _allowance - (amount + flashfee));
-
-    if result.is_err() {
-        panic!("123")
-    }
+    erc20.approve(get_top_caller_address(), allowance - (amount + flashfee));
 
     let result = erc20.burn(receiver, amount + flashfee);
     if result.is_err() {
-        panic!("234")
+        let erc20error = result.err().unwrap();
+        match erc20error {
+            ERC20Error::InsufficientBalance => return Err(Error::FlashMinterInsufficientBalance),
+
+            ERC20Error::Overflow => return Err(Error::FlashMinterOverflow),
+            _ => (),
+        }
     }
 
     Ok(true)
