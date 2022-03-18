@@ -1,1 +1,6 @@
 target
+bk
+scenario_minter_bk0315
+node_modules/
+eip3156clientrust
+eip3156clientjs

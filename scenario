@@ -14,21 +14,13 @@ casper-client put-deploy --node-address http://16.162.124.124:7777  \
 --session-arg "decimals:u8='10'" \
 --session-arg "total_supply:u256='1000000000000000'" 
 ```
- skip ========== ========== step2: get balance of test77 account ========== ========== 
-```
-casper-client put-deploy --chain-name casper-test \
--n http://16.162.124.124:7777 \
---session-path target/wasm32-unknown-unknown/release/getbalance.wasm  \
---secret-key /home/jh/keys/test77/secret_key.pem \
---payment-amount 1000000000
-```
 
- ========== ========== step3 =============
+ ========== ========== step2 =============
 install lender contract (ld-contract)   -> by js client
 => "LENDER"
 "hash-264a963cf6da3866f21bb6fbe426d0c5d4f37fc3c297d3919a040acdb231a559"
 contract-package-wasm96053169b397360449b4de964200be449594ca93f252153f0a679b804e214a54
- ========== ========== step4.1 =========
+ ========== ========== step3 =========
 transfer tokens to LENDER
 
 casper-client put-deploy --node-address http://16.162.124.124:7777  \
@@ -42,7 +34,7 @@ casper-client put-deploy --node-address http://16.162.124.124:7777  \
 
 
 
- ========== ========== step 5 ==========
+ ========== ========== step 4 ==========
 ====get LANDER balance of erc20==========
 
 casper-client put-deploy --chain-name casper-test \
@@ -53,7 +45,7 @@ casper-client put-deploy --chain-name casper-test \
 
 =>5000
 
- ========== ========== step 6 ===========
+ ========== ========== step 5 ===========
 install borrower contract(br-contract)
 -> by command
 ???js client cannot parse package hash correctly => todo
@@ -69,7 +61,7 @@ casper-client put-deploy --node-address http://16.162.124.124:7777  \
 "hash-2eb360a3cef054e3b588c9d342002ba6382250aa2355bd3e923ad7558da8214a"
 contract-package-wasm5daa83c7d18629fcdf3910ef4a284b6a3288e8879b24b199966857e857244844
 
- ========== ========== step7 =========
+ ========== ========== step6 =========
 transfer tokens to borrower for flashfee
 
 casper-client put-deploy --node-address http://16.162.124.124:7777  \
@@ -82,7 +74,7 @@ casper-client put-deploy --node-address http://16.162.124.124:7777  \
 --session-arg "amount:u256='3'" 
 
 
- ========== ==========  step 8 ========
+ ========== ==========  step 7 ========
 invoke flash_borrow of borrower
 
 casper-client put-deploy --chain-name casper-test \

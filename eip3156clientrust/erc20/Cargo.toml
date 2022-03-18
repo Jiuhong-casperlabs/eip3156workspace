@@ -14,3 +14,7 @@ hex = { version = "0.4.3", default-features = false }
 name = "getbalance"
 path = "src/getbalance.rs"
 
+[[bin]]
+name = "getallowance"
+path = "src/getallowance.rs"
+

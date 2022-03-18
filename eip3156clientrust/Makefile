@@ -7,6 +7,7 @@ build-contract:
 	wasm-strip target/wasm32-unknown-unknown/release/maxflashloan.wasm 2>/dev/null | true
 	cargo build --release -p erc20 --target wasm32-unknown-unknown
 	wasm-strip target/wasm32-unknown-unknown/release/getbalance.wasm 2>/dev/null | true
+	wasm-strip target/wasm32-unknown-unknown/release/getallowance.wasm 2>/dev/null | true
 	wasm-strip target/wasm32-unknown-unknown/release/readallowance.wasm 2>/dev/null | true
 	
 	

@@ -72,7 +72,7 @@ const main = async () => {
     DeployUtil.ExecutableDeployItem.newModuleBytes(
       utils.getBinary(PATH_TO_CONTRACT),
       RuntimeArgs.fromMap({
-        initial_supportted_tokens: SUPPORTED_TOKENS,
+        initial_supported_tokens: SUPPORTED_TOKENS,
       })
     ),
     DeployUtil.standardPayment(constants.DEPLOY_GAS_PAYMENT_FOR_INSTALL)

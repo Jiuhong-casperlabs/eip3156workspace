@@ -1,0 +1,61 @@
+ ========== ========== step1: install minter(improved erc20)  ========== ========== 
+under jdk1 
+
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/jdk1/secret_key.pem \
+--payment-amount 110000000000 \
+--session-path target/wasm32-unknown-unknown/release/minter.wasm  \
+--session-arg "name:String='ORANGE'" \
+--session-arg "symbol:String='OOO'" \
+--session-arg "fee:U256='10'" \
+--session-arg "decimals:u8='10'" \
+--session-arg "total_supply:u256='1000000000000000'" 
+
+
+key_name: erc20_token_contract
+-> contract hash: 
+hash-248fc941184dcf6ac72ae236f46f375120b9d5cd54807d39cb97fbb686ba1635
+package hash:
+hash-2c4ea63b2ece508ba7a3f68ab79e6bfc76a3195012d72c3cb15df72f5f438b1d
+
+ ========== ========== step2: install borrower =========
+install borrower contract(borrower)
+-> by command
+
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/jdk1/secret_key.pem \
+--payment-amount 70000000000 \
+--session-path /home/jh/mywork/eip3156workspace/eip3156-1/target/wasm32-unknown-unknown/release/borrower.wasm  \
+--session-arg "lender_address:Key='hash-2c4ea63b2ece508ba7a3f68ab79e6bfc76a3195012d72c3cb15df72f5f438b1d'" 
+
+=> "BORROWER":
+-> contract hash:
+hash-4db95f23d6e97f4d0c7a88360a47d4716643f5a05b63fc188a11ac6e139e2950
+-> package hash:
+hash-d881151cf7fd63a668889b9dfc3975339e72e01c947a9b9ff93add30afa2a6d4
+
+ ========== ========== step3 transfer tokens to borrower for flashfee =========
+
+
+casper-client put-deploy --node-address http://16.162.124.124:7777  \
+--chain-name casper-test \
+--secret-key /home/jh/keys/jdk1/secret_key.pem \
+--payment-amount 10000000000 \
+--session-package-hash hash-2c4ea63b2ece508ba7a3f68ab79e6bfc76a3195012d72c3cb15df72f5f438b1d  \
+--session-entry-point "transfer" \
+--session-arg "recipient:key='hash-d881151cf7fd63a668889b9dfc3975339e72e01c947a9b9ff93add30afa2a6d4'" \
+--session-arg "amount:u256='3'" 
+
+
+
+ ========== ==========  step 4 invoke flash_borrow of borrower========
+casper-client put-deploy --chain-name casper-test \
+-n http://16.162.124.124:7777 \
+--secret-key /home/jh/keys/jdk1/secret_key.pem \
+--payment-amount 5000000000 \
+--session-package-hash hash-d881151cf7fd63a668889b9dfc3975339e72e01c947a9b9ff93add30afa2a6d4  \
+--session-entry-point "flash_borrow" \
+--session-arg "token:key='hash-2c4ea63b2ece508ba7a3f68ab79e6bfc76a3195012d72c3cb15df72f5f438b1d'" \
+--session-arg "amount:u256='2222'"
