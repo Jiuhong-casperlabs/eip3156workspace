@@ -319,8 +319,8 @@ mod tests {
 
     #[test]
     fn test_flash_borrow_success() {
-        let total_supply = U256::from(2220000000u128);
-        let (mut builder, test_context) = setup(total_supply);
+        let inital_total_supply = U256::from(2220000000u128);
+        let (mut builder, test_context) = setup(inital_total_supply);
         // transfer erc20 token to borrower
         let amount = U256::from(222u128);
 
@@ -352,13 +352,13 @@ mod tests {
             builder.get_value(test_context.minter_contract_hash, TOTAL_SUPPLY_KEY);
         assert_eq!(total_supply_before - flash_fee, total_supply_after);
     }
-
     #[test]
-    fn test_flash_borrow_insufficent_balance_borrower() {
-        let total_supply = U256::from(2220000000u128);
-        let (mut builder, test_context) = setup(total_supply);
+    fn test_flash_borrow_borrowamount_overflow() {
+        // test max borrow amount
+        let inital_total_supply = U256::from(2220000000u128);
+        let (mut builder, test_context) = setup(inital_total_supply);
         // transfer erc20 token to borrower
-        let amount = U256::from(22u128);
+        let amount = U256::from(222u128);
 
         tranfer_erc20(&mut builder, &test_context, amount);
         // get balance of borrower before borrow
@@ -370,33 +370,32 @@ mod tests {
             builder.get_value(test_context.minter_contract_hash, TOTAL_SUPPLY_KEY);
 
         // flash_borrow
-        let amount = U256::from(23200u128);
+        let amount = U256::MAX;
         let execute_request = make_flash_borrow_request(&test_context, amount);
 
         builder.exec(execute_request).commit();
+
         let error = builder.get_error().expect("should have error");
         assert!(
-            matches!(error, CoreError::Exec(ExecError::Revert(ApiError::User(user_error))) if user_error == ERROR_INSUFFICIENT_BALANCE),
+            matches!(error, CoreError::Exec(ExecError::Revert(ApiError::User(user_error))) if user_error == ERROR_OVERFLOW),
             "{:?}",
             error
         );
 
         // get balance of borrower after borrow
         let balance_borrower_after = balance_of(&mut builder, &test_context);
-        //balance of borrower shouldn't be changed
         assert_eq!(balance_borrower_before, balance_borrower_after);
 
         // get totalsupply of minter after borrow
         let total_supply_after: U256 =
             builder.get_value(test_context.minter_contract_hash, TOTAL_SUPPLY_KEY);
-        //balance of total_supply shouldn't be changed
         assert_eq!(total_supply_before, total_supply_after);
     }
-
     #[test]
-    fn test_flash_borrow_overflow() {
-        let total_supply = U256::max_value();
-        let (mut builder, test_context) = setup(total_supply);
+    fn test_flash_borrow_initialsupply_overflow() {
+        // test max intial supply amount
+        let inital_total_supply = U256::max_value();
+        let (mut builder, test_context) = setup(inital_total_supply);
         // transfer erc20 token to borrower
         let amount = U256::from(22u128);
 
@@ -417,6 +416,46 @@ mod tests {
         let error = builder.get_error().expect("should have error");
         assert!(
             matches!(error, CoreError::Exec(ExecError::Revert(ApiError::User(user_error))) if user_error == ERROR_OVERFLOW),
+            "{:?}",
+            error
+        );
+
+        // get balance of borrower after borrow
+        let balance_borrower_after = balance_of(&mut builder, &test_context);
+        //balance of borrower shouldn't be changed
+        assert_eq!(balance_borrower_before, balance_borrower_after);
+
+        // get totalsupply of minter after borrow
+        let total_supply_after: U256 =
+            builder.get_value(test_context.minter_contract_hash, TOTAL_SUPPLY_KEY);
+        //balance of total_supply shouldn't be changed
+        assert_eq!(total_supply_before, total_supply_after);
+    }
+
+    #[test]
+    fn test_flash_borrow_insufficent_balance_borrower() {
+        let inital_total_supply = U256::from(2220000000u128);
+        let (mut builder, test_context) = setup(inital_total_supply);
+        // transfer erc20 token to borrower
+        let amount = U256::from(22u128);
+
+        tranfer_erc20(&mut builder, &test_context, amount);
+        // get balance of borrower before borrow
+        let balance_borrower_before = balance_of(&mut builder, &test_context);
+        assert_eq!(amount, balance_borrower_before);
+
+        // get total supply before flash borrow
+        let total_supply_before: U256 =
+            builder.get_value(test_context.minter_contract_hash, TOTAL_SUPPLY_KEY);
+
+        // flash_borrow
+        let amount = U256::from(23200u128);
+        let execute_request = make_flash_borrow_request(&test_context, amount);
+
+        builder.exec(execute_request).commit();
+        let error = builder.get_error().expect("should have error");
+        assert!(
+            matches!(error, CoreError::Exec(ExecError::Revert(ApiError::User(user_error))) if user_error == ERROR_INSUFFICIENT_BALANCE),
             "{:?}",
             error
         );

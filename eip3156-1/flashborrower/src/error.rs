@@ -6,16 +6,6 @@ use casper_types::{
 };
 
 use core::convert::TryFrom;
-// "FlashMinter: Unsupported currency"
-// "FlashMinter: Callback failed"
-// "FlashMinter: Repay not approved"
-// "FlashLender: Unsupported currency"
-// "FlashLender: Transfer failed"
-// "FlashLender: Callback failed"
-// "FlashLender: Repay failed"
-// "IERC3156: Callback failed"
-// "FlashBorrower: Untrusted lender"
-// "FlashBorrower: Untrusted loan initiator"
 
 pub enum Error {
     FlashMinterUnsupportedCurrency,

@@ -1,3 +1,9 @@
+use crate::constants::{
+    ALLOWANCE_ENTRY_POINT_NAME, AMOUNT_RUNTIME_ARG_NAME, APPROVE_ENTRY_POINT_NAME, CALLBACK_STRING,
+    DATA_RUNTIME_ARG_NAME, FLASH_FEE_ENTRY_POINT_NAME, FLASH_LOAN_ENTRY_POINT_NAME,
+    OWNER_RUNTIME_ARG_NAME, RECEIVER_RUNTIME_ARG_NAME, SPENDER_RUNTIME_ARG_NAME,
+    TOKEN_RUNTIME_ARG_NAME,
+};
 use crate::Error;
 use casper_contract::contract_api::runtime;
 use casper_erc20::Address;
@@ -53,8 +59,7 @@ pub fn on_flash_loan(
     // TO DO: Action about data -> plan to add history
     // TO DO: Action about data -> plan to add history
 
-    let string = "ERC3156FlashBorrower.onFlashLoan";
-    let bytes = string.as_bytes();
+    let bytes = CALLBACK_STRING.as_bytes();
 
     let callback_success: [u8; 32] = runtime::blake2b(bytes);
 
@@ -77,10 +82,10 @@ pub fn flash_borrow(lender: Address, token: Address, amount: U256) -> Result<(),
     let _allowance: U256 = runtime::call_versioned_contract(
         erc20_package_hash,
         None,
-        "allowance",
+        ALLOWANCE_ENTRY_POINT_NAME,
         runtime_args! {
-            "owner" => topaddress,
-            "spender" => lender
+            OWNER_RUNTIME_ARG_NAME => topaddress,
+            SPENDER_RUNTIME_ARG_NAME => lender
         },
     );
     // allowance end
@@ -94,10 +99,10 @@ pub fn flash_borrow(lender: Address, token: Address, amount: U256) -> Result<(),
     let flashfee: U256 = runtime::call_versioned_contract(
         lender_package_hash,
         None,
-        "flash_fee",
+        FLASH_FEE_ENTRY_POINT_NAME,
         runtime_args! {
-            "token"=> token,
-            "amount"=> amount,
+            TOKEN_RUNTIME_ARG_NAME=> token,
+            AMOUNT_RUNTIME_ARG_NAME=> amount,
         },
     );
 
@@ -112,10 +117,10 @@ pub fn flash_borrow(lender: Address, token: Address, amount: U256) -> Result<(),
     runtime::call_versioned_contract::<()>(
         erc20_package_hash,
         None,
-        "approve",
+        APPROVE_ENTRY_POINT_NAME,
         runtime_args! {
-            "spender" => lender,
-            "amount" => _allowance + _repayment,
+            SPENDER_RUNTIME_ARG_NAME => lender,
+            AMOUNT_RUNTIME_ARG_NAME => _allowance + _repayment,
         },
     );
 
@@ -123,12 +128,12 @@ pub fn flash_borrow(lender: Address, token: Address, amount: U256) -> Result<(),
     let result: bool = runtime::call_versioned_contract(
         lender_package_hash,
         None,
-        "flash_loan",
+        FLASH_LOAN_ENTRY_POINT_NAME,
         runtime_args! {
-            "receiver"=> topaddress,
-            "token" => token,
-            "amount"=> amount,
-            "data" => "data",
+            RECEIVER_RUNTIME_ARG_NAME=> topaddress,
+            TOKEN_RUNTIME_ARG_NAME => token,
+            AMOUNT_RUNTIME_ARG_NAME=> amount,
+            DATA_RUNTIME_ARG_NAME => "data",
         },
     );
 

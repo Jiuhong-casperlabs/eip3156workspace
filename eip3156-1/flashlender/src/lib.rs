@@ -65,7 +65,8 @@ impl EIP3156LENDER {
         let supportted_tokens: Vec<Address> = self.read_supported_tokens();
 
         if supportted_tokens.contains(&token) {
-            flashlend::flash_loan(self, receiver, token, amount, data)
+            let fee = self.read_loan_fee(token);
+            flashlend::flash_loan(fee, receiver, token, amount, data)
         } else {
             Err(Error::FlashLenderUnsupportedCurrency)
         }
@@ -75,7 +76,8 @@ impl EIP3156LENDER {
         let supportted_tokens: Vec<Address> = self.read_supported_tokens();
 
         if supportted_tokens.contains(&token) {
-            Ok(flashlend::flash_fee(self, token, amount))
+            let fee = self.read_loan_fee(token);
+            flashlend::flash_fee(fee, amount)
         } else {
             Err(Error::FlashLenderUnsupportedCurrency)
         }

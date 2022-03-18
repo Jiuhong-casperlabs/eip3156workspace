@@ -14,6 +14,14 @@ pub const MAX_FLASH_LOAN_ENTRY_POINT_NAME: &str = "max_flash_loan";
 pub const FLASH_FEE_ENTRY_POINT_NAME: &str = "flash_fee";
 /// Name of `flash_loan` entry point.
 pub const FLASH_LOAN_ENTRY_POINT_NAME: &str = "flash_loan";
+/// Name of `on_flash_loan` entry point.
+pub const ON_FLASH_LOAN_ENTRY_POINT_NAME: &str = "on_flash_loan";
+/// Name of `balance_of` entry point.
+pub const BALANCE_OF_ENTRY_POINT_NAME: &str = "balance_of";
+/// Name of `transfer_from` entry point.
+pub const TRANSFER_FROM_ENTRY_POINT_NAME: &str = "transfer_from";
+/// Name of `transfer` entry point.
+pub const TRANSFER_ENTRY_POINT_NAME: &str = "transfer";
 /// Name of `receiver` argument input.
 pub const RECEIVER_RUNTIME_ARG_NAME: &str = "receiver";
 /// Name of `token` argument input.
@@ -22,5 +30,17 @@ pub const TOKEN_RUNTIME_ARG_NAME: &str = "token";
 pub const AMOUNT_RUNTIME_ARG_NAME: &str = "amount";
 /// Name of `data` argument input.
 pub const DATA_RUNTIME_ARG_NAME: &str = "data";
-
+/// Name of `LENDER` argument input.
 pub const LENDER_PACKAGE_NAME: &str = "LENDER";
+/// Name of `address` argument input.
+pub const ADDRESS_RUNTIME_ARG_NAME: &str = "address";
+/// Name of `owner` argument input.
+pub const OWNER_RUNTIME_ARG_NAME: &str = "owner";
+/// Name of `recipient` argument input.
+pub const RECIPIENT_RUNTIME_ARG_NAME: &str = "recipient";
+/// Name of `initiator` argument input.
+pub const INITIATOR_RUNTIME_ARG_NAME: &str = "initiator";
+/// Name of `fee` argument input.
+pub const FEE_RUNTIME_ARG_NAME: &str = "fee";
+/// callback string.
+pub const CALLBACK_STRING: &str = "ERC3156FlashBorrower.onFlashLoan";

@@ -1,9 +1,17 @@
 pub const LENDER_KEY_NAME: &str = "lender";
 pub const ON_FLASH_LOAN_ENTRY_POINT_NAME: &str = "on_flash_loan";
 pub const FLASH_BORROW_ENTRY_POINT_NAME: &str = "flash_borrow";
+pub const FLASH_LOAN_ENTRY_POINT_NAME: &str = "flash_loan";
+pub const FLASH_FEE_ENTRY_POINT_NAME: &str = "flash_fee";
+pub const APPROVE_ENTRY_POINT_NAME: &str = "approve";
+pub const ALLOWANCE_ENTRY_POINT_NAME: &str = "allowance";
 pub const DATA_RUNTIME_ARG_NAME: &str = "data";
 pub const AMOUNT_RUNTIME_ARG_NAME: &str = "amount";
 pub const TOKEN_RUNTIME_ARG_NAME: &str = "token";
 pub const INITIATOR_RUNTIME_ARG_NAME: &str = "initiator";
+pub const RECEIVER_RUNTIME_ARG_NAME: &str = "receiver";
 pub const FEE_RUNTIME_ARG_NAME: &str = "fee";
+pub const OWNER_RUNTIME_ARG_NAME: &str = "owner";
+pub const SPENDER_RUNTIME_ARG_NAME: &str = "spender";
 pub const PACKAGE_NAME: &str = "BORROWER";
+pub const CALLBACK_STRING: &str = "ERC3156FlashBorrower.onFlashLoan";

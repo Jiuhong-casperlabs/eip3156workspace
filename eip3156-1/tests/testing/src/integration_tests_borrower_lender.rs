@@ -32,6 +32,7 @@ mod tests {
     const ERC20_CONTRACT_KEY: &str = "erc20_token_contract";
     const ERC20_PACKAGE_KEY: &str = "erc20_package_hash";
     const ERROR_INSUFFICIENT_BALANCE: u16 = u16::MAX - 1;
+    const ERROR_FFLASH_LENDER_OVERFLOW: u16 = u16::MAX - 210;
 
     struct TestFixture {
         account_address: AccountHash,
@@ -431,7 +432,6 @@ mod tests {
         // ===============  check balance after flash borrow start======
         // get flash fee
         let flash_fee = flash_fee(&mut builder, &test_context, amount);
-        println!("flash_fee is {}", flash_fee);
 
         // get balance of lender *after* flash borrow
         let to_lender = true;
@@ -573,6 +573,70 @@ mod tests {
 
         //balance of borrower shouldn't be changed
         assert_eq!(balance_borrower_before, balance_borrower_after);
+        // ===============  check balance after flash borrow end======
+    }
+
+    #[test]
+    fn test_flash_borrow_borrowamount_overflow() {
+        // test max borrow amount
+        let (mut builder, test_context) = setup();
+
+        // =============== transfer ERC20 token to lender start ===============
+        let to_lender = true;
+        let amount_lender_before = U256::from(5000u128);
+
+        tranfer_erc20(&mut builder, &test_context, to_lender, amount_lender_before);
+
+        let balance_lender_before = balance_of(&mut builder, &test_context, to_lender);
+        // get original balance of lender *before* flash borrow
+        assert_eq!(amount_lender_before, balance_lender_before);
+        // =============== transfer ERC20 token to lender end ===============
+
+        // =============== transfer erc20 token to borrower ===============
+        // =============== for covering flash fee start ===============
+        let to_lender = false;
+        let amount_borrower_before = U256::from(5000u128);
+        tranfer_erc20(
+            &mut builder,
+            &test_context,
+            to_lender,
+            amount_borrower_before,
+        );
+        //  get balance of borrower *before* flash borrow
+        let balance_borrower_before = balance_of(&mut builder, &test_context, to_lender);
+        assert_eq!(amount_borrower_before, balance_borrower_before);
+        // =============== transfer erc20 token to borrower ===============
+        // =============== for covering flash fee end ===============
+
+        // ===============  flash_borrow start ==========================
+        let amount = U256::max_value();
+        let execute_request = make_flash_borrow_request(&test_context, amount);
+
+        builder.exec(execute_request).commit();
+
+        let error = builder.get_error().expect("should have error");
+        assert!(
+            matches!(error, CoreError::Exec(ExecError::Revert(ApiError::User(user_error))) if user_error == ERROR_FFLASH_LENDER_OVERFLOW),
+            "{:?}",
+            error
+        );
+        // ===============  flash_borrow end ==========================
+
+        // ===============  check balance after flash borrow start======
+
+        // get balance of lender *after* flash borrow
+        let to_lender = true;
+        let balance_lender_after = balance_of(&mut builder, &test_context, to_lender);
+
+        //balance of lender shouldn't be changed
+        assert_eq!(amount_lender_before, balance_lender_after);
+
+        // get balance of borrower *after* flash borrow
+        let to_lender = false;
+        let balance_borrower_after = balance_of(&mut builder, &test_context, to_lender);
+
+        //balance of borrower shouldn't be changed
+        assert_eq!(amount_borrower_before, balance_borrower_after);
         // ===============  check balance after flash borrow end======
     }
 

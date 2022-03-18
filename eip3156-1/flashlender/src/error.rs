@@ -6,17 +6,8 @@ use casper_types::{
 };
 
 use core::convert::TryFrom;
-// "FlashMinter: Unsupported currency"
-// "FlashMinter: Callback failed"
-// "FlashMinter: Repay not approved"
-// "FlashLender: Unsupported currency"
-// "FlashLender: Transfer failed"
-// "FlashLender: Callback failed"
-// "FlashLender: Repay failed"
-// "IERC3156: Callback failed"
-// "FlashBorrower: Untrusted lender"
-// "FlashBorrower: Untrusted loan initiator"
-
+/// error for flashlender
+#[derive(Debug)]
 pub enum Error {
     FlashMinterUnsupportedCurrency,
     FlashMinterCallbackFailed,
@@ -28,28 +19,32 @@ pub enum Error {
     IERC3156CallbackFailed,
     FlashBorrowerUntrustedFender,
     FlashBorrowerUntrustedLoanInitiator,
+    FlashLenderOverflow,
 }
 
-///65435
-const ERROR_FLASH_MINTER_UNSUPPORTED_CURRENCY: u16 = u16::MAX - 100;
-///65434
-const ERROR_FLASH_MINTER_CALLBACK_FAILED: u16 = u16::MAX - 101;
-///65433
-const ERROR_FLASH_MINTER_REPAY_NOT_APPROVED: u16 = u16::MAX - 102;
-///65432
-const ERROR_FLASH_LENDER_UNSUPPORTED_CURRENCY: u16 = u16::MAX - 103;
-///65431
-const ERROR_FLASH_LENDER_TRANSFER_FAILED: u16 = u16::MAX - 104;
-///65430
-const ERROR_FLASH_LENDER_CALLBACK_FAILED: u16 = u16::MAX - 105;
-///65429
-const ERROR_FLASH_LENDER_REPAY_FAILED: u16 = u16::MAX - 106;
-///65428
-const ERROR_IERC3156_CALLBACK_FAILED: u16 = u16::MAX - 107;
-///65427
-const ERROR_FLASH_BORROWER_UNTRUSTED_FENDER: u16 = u16::MAX - 108;
-///65535 - 109 = 65426
-const ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR: u16 = u16::MAX - 109;
+// 65535  u16::MAX
+///65335
+const ERROR_FLASH_MINTER_UNSUPPORTED_CURRENCY: u16 = u16::MAX - 200;
+///65334
+const ERROR_FLASH_MINTER_CALLBACK_FAILED: u16 = u16::MAX - 201;
+///65333
+const ERROR_FLASH_MINTER_REPAY_NOT_APPROVED: u16 = u16::MAX - 202;
+///65332
+const ERROR_FLASH_LENDER_UNSUPPORTED_CURRENCY: u16 = u16::MAX - 203;
+///65331
+const ERROR_FLASH_LENDER_TRANSFER_FAILED: u16 = u16::MAX - 204;
+///65330
+const ERROR_FLASH_LENDER_CALLBACK_FAILED: u16 = u16::MAX - 205;
+///65329
+const ERROR_FLASH_LENDER_REPAY_FAILED: u16 = u16::MAX - 206;
+///65328
+const ERROR_IERC3156_CALLBACK_FAILED: u16 = u16::MAX - 207;
+///65327
+const ERROR_FLASH_BORROWER_UNTRUSTED_FENDER: u16 = u16::MAX - 208;
+///65535 - 209 = 65326
+const ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR: u16 = u16::MAX - 209;
+///65535 - 210 = 65325
+const ERROR_FFLASH_LENDER_OVERFLOW: u16 = u16::MAX - 210;
 
 impl From<Error> for ApiError {
     fn from(error: Error) -> Self {
@@ -66,6 +61,7 @@ impl From<Error> for ApiError {
             Error::FlashBorrowerUntrustedLoanInitiator => {
                 ERROR_FFLASH_BORROWER_UNTRUSTED_LOAN_INITIATOR
             }
+            Error::FlashLenderOverflow => ERROR_FFLASH_LENDER_OVERFLOW,
         };
         ApiError::User(user_error)
     }

@@ -1,3 +1,4 @@
+use crate::constants::LENDER_KEY_NAME;
 use casper_contract::{
     contract_api::{runtime, storage},
     unwrap_or_revert::UnwrapOrRevert,
@@ -18,5 +19,5 @@ fn get_uref(name: &str) -> URef {
 }
 
 pub fn get_lender_uref() -> URef {
-    get_uref("lender")
+    get_uref(LENDER_KEY_NAME)
 }

@@ -7,6 +7,11 @@ use casper_types::{
 
 use crate::{error::Error as ERC20Error, Address, ERC20};
 mod error_flashmint;
+
+use crate::constants::{
+    AMOUNT_RUNTIME_ARG_NAME, DATA_RUNTIME_ARG_NAME, FEE_RUNTIME_ARG_NAME,
+    INITIATOR_RUNTIME_ARG_NAME, ON_FLASH_LOAN_ENTRY_POINT_NAME, TOKEN_RUNTIME_ARG_NAME,
+};
 pub use error_flashmint::Error;
 
 /// Returns address based on a [`CallStackElement`].
@@ -54,15 +59,20 @@ fn get_second_caller_address() -> Address {
     call_stack_element_to_address(get_second_call_stack_item())
 }
 
-fn _flash_fee(amount: U256, fee: U256) -> U256 {
-    amount * fee / 10000
+fn _flash_fee(amount: U256, fee: U256) -> Result<U256, Error> {
+    // amount * fee / 10000
+    amount
+        .checked_mul(fee)
+        .ok_or(Error::FlashMinterOverflow)?
+        .checked_div(U256::from(10000u128))
+        .ok_or(Error::FlashMinterOverflow)
 }
 
 pub(crate) fn flash_fee(erc20: &mut ERC20, token: Address, amount: U256) -> Result<U256, Error> {
     if token != get_top_caller_address() {
         Err(Error::FlashMinterUnsupportedCurrency)
     } else {
-        Ok(_flash_fee(amount, erc20.loan_fee()))
+        _flash_fee(amount, erc20.loan_fee())
     }
 }
 
@@ -100,11 +110,11 @@ pub(crate) fn flash_loan(
 
     let msgsender = get_second_caller_address();
     let callback_args = runtime_args! {
-        "initiator" => msgsender,
-        "token" => token,
-        "amount" => amount,
-        "fee" => flashfee,
-        "data" => data
+        INITIATOR_RUNTIME_ARG_NAME => msgsender,
+        TOKEN_RUNTIME_ARG_NAME => token,
+        AMOUNT_RUNTIME_ARG_NAME => amount,
+        FEE_RUNTIME_ARG_NAME => flashfee,
+        DATA_RUNTIME_ARG_NAME => data
     };
 
     let string = "ERC3156FlashBorrower.onFlashLoan";
@@ -114,7 +124,7 @@ pub(crate) fn flash_loan(
     let callback_result: [u8; 32] = runtime::call_versioned_contract(
         receiver_package_hash,
         None,
-        "on_flash_loan",
+        ON_FLASH_LOAN_ENTRY_POINT_NAME,
         callback_args,
     );
 

@@ -37,8 +37,10 @@ pub const ALLOWANCE_ENTRY_POINT_NAME: &str = "allowance";
 pub const TRANSFER_FROM_ENTRY_POINT_NAME: &str = "transfer_from";
 /// Name of `total_supply` entry point.
 pub const TOTAL_SUPPLY_ENTRY_POINT_NAME: &str = "total_supply";
-
 // EIP3156 start
+/// Name of `on_flash_loan` entry point.
+pub const ON_FLASH_LOAN_ENTRY_POINT_NAME: &str = "on_flash_loan";
+
 /// Name of `loan_fee` entry point.
 pub const LOAN_FEE_ENTRY_POINT_NAME: &str = "loan_fee";
 /// Name of `max_flash_loan` entry point.
@@ -53,6 +55,10 @@ pub const RECEIVER_RUNTIME_ARG_NAME: &str = "receiver";
 pub const TOKEN_RUNTIME_ARG_NAME: &str = "token";
 /// Name of `data` argument.
 pub const DATA_RUNTIME_ARG_NAME: &str = "data";
+/// Name of `initiator` argument.
+pub const INITIATOR_RUNTIME_ARG_NAME: &str = "initiator";
+/// Name of `fee` argument.
+pub const FEE_RUNTIME_ARG_NAME: &str = "fee";
 // EIP3156 end
 
 /// Name of `address` runtime argument.
