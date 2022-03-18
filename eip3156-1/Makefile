@@ -7,12 +7,11 @@ build-contracts:
 	cargo build --release -p lender --target wasm32-unknown-unknown
 	cargo build --release -p minter --target wasm32-unknown-unknown
 	cargo build --release -p eip3156-test-call --target wasm32-unknown-unknown
-	cargo build --release -p minter-test-call --target wasm32-unknown-unknown
 	wasm-strip target/wasm32-unknown-unknown/release/borrower.wasm 2>/dev/null | true
 	wasm-strip target/wasm32-unknown-unknown/release/lender.wasm 2>/dev/null | true
 	wasm-strip target/wasm32-unknown-unknown/release/minter.wasm 2>/dev/null | true
 	wasm-strip target/wasm32-unknown-unknown/release/eip3156_test_call.wasm 2>/dev/null | true
-	wasm-strip target/wasm32-unknown-unknown/release/minter-test-call.wasm 2>/dev/null | true
+
 
 
 test-only:
