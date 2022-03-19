@@ -278,6 +278,40 @@ mod tests {
         // println!("herherhereh is {}", value);
     }
 
+    fn max_flash_loan(builder: &mut InMemoryWasmTestBuilder, test_context: &TestFixture) -> U256 {
+        let test_call_contract_package = test_context
+            .test_call_package_hash_key
+            .into_hash()
+            .map(ContractPackageHash::new)
+            .expect("should be package hash");
+
+        let minter_contract_package = test_context
+            .minter_package_hash_key
+            .into_hash()
+            .map(ContractPackageHash::new)
+            .expect("should be hash");
+        let deploy = DeployItemBuilder::new()
+            .with_address(test_context.account_address)
+            .with_stored_versioned_contract_by_name(
+                "test_call_package_hash",
+                None,
+                "get_max_flash_loan",
+                runtime_args! {
+                    "token" => test_context.minter_package_hash_key,
+                    "lender" => minter_contract_package
+                },
+            )
+            .with_empty_payment_bytes(runtime_args! { ARG_AMOUNT => *DEFAULT_PAYMENT, })
+            .with_authorization_keys(&[test_context.account_address])
+            .with_deploy_hash([42; 32])
+            .build();
+
+        let execute_request = ExecuteRequestBuilder::from_deploy_item(deploy).build();
+        builder.exec(execute_request).commit().expect_success();
+
+        get_test_result(builder, test_call_contract_package)
+    }
+
     fn flash_fee(
         builder: &mut InMemoryWasmTestBuilder,
         test_context: &TestFixture,
@@ -470,6 +504,17 @@ mod tests {
             builder.get_value(test_context.minter_contract_hash, TOTAL_SUPPLY_KEY);
         //balance of total_supply shouldn't be changed
         assert_eq!(total_supply_before, total_supply_after);
+    }
+    #[test]
+    fn test_get_max_flash_loan() {
+        let inital_total_supply = U256::from(2220000000u128);
+        let (mut builder, test_context) = setup(inital_total_supply);
+
+        let max_flash_loan = max_flash_loan(&mut builder, &test_context);
+
+        let expected_max_flash_loan = U256::MAX - inital_total_supply;
+        // balance of lender should be equal to max flash loan
+        assert_eq!(expected_max_flash_loan, max_flash_loan);
     }
 }
 
