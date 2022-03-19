@@ -95,7 +95,6 @@ installed contract -> LEND
 ... deploy chain = ${constants.DEPLOY_CHAIN_NAME}
 ... deploy dispatch node = ${constants.DEPLOY_NODE_ADDRESS}
 ... deploy gas payment = ${constants.DEPLOY_GAS_PAYMENT_FOR_INSTALL}
-... deploy gas price = ${constants.DEPLOY_GAS_PRICE}
 contract installation details:
 ... path = ${PATH_TO_CONTRACT}
 ... deploy hash = ${deployHash}
