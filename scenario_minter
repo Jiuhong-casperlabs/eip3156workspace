@@ -21,7 +21,6 @@ hash-2c4ea63b2ece508ba7a3f68ab79e6bfc76a3195012d72c3cb15df72f5f438b1d
 
  ========== ========== step2: install borrower =========
 install borrower contract(borrower)
--> by command
 
 casper-client put-deploy --node-address http://16.162.124.124:7777  \
 --chain-name casper-test \

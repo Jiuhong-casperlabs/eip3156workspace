@@ -46,9 +46,7 @@ casper-client put-deploy --chain-name casper-test \
 =>5000
 
  ========== ========== step 5 ===========
-install borrower contract(br-contract)
--> by command
-???js client cannot parse package hash correctly => todo
+install borrower contract
 
 casper-client put-deploy --node-address http://16.162.124.124:7777  \
 --chain-name casper-test \

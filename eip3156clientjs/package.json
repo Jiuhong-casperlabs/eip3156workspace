@@ -1,0 +1,15 @@
+{
+  "name": "eip3156",
+  "version": "1.0.0",
+  "description": "sdk for eip3156 contract",
+  "scripts": {
+    "lenderinstall": "node -r esm -e 'require(\"./src/lend_contract_install.js\")'"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "casper-js-sdk": "^2.5.0",
+    "esm": "^3.2.25",
+    "lodash": "^4.17.21"
+  }
+}
